@@ -1,7 +1,7 @@
 /**
 * Copyright (C) 2021 All rights reserved.
 * @file test.cpp
-* @brief  
+* @brief  one d for symmetric storage
 * @author Yang Kuang (matkuan@nus.edu.sg)
 * @date 2021-01-26
 * @return 
