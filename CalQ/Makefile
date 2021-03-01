@@ -1,12 +1,12 @@
-SOURCE = $(wildcard *.cpp)
-OBJ = $(patsubst %.cpp, %.o, $(SOURCE))
+HEADER = $(wildcard *.h)
+BIN = $(patsubst %.cpp, %, $(wildcard *.cpp))
 
-CXXFLAGS = -Wall 
+CXXFLAGS = -Wall
 
-LDFLAGS = -lm 
+LDFLAGS = -lm
 
 ifeq (x$(debug), x)
-	CXXFLAGS += -O3 -fopenmp
+	CXXFLAGS += -O3
 else
 	CXXFLAGS += -g -DDEBUG
 endif
@@ -20,15 +20,10 @@ ifneq (x$(cpp0x), x)
 endif
 
 
-all: main
-
-main : $(OBJ) 
-	$(CXX) -o $@ $(OBJ) $(CXXFLAGS) $(LDFLAGS)
-
-%.o : %.cpp 
-	$(CXX) -c -o $@ $(CPPFLAGS) $(CXXFLAGS) $< 
+all: $(BIN)
+$(BIN): % : %.cpp $(HEADER)
+	$(CXX) -o $@ $(CPPFLAGS) $(CXXFLAGS) $< $(LDFLAGS)
 
 .PHONY: clean
 clean:
-	-rm $(OBJ)
-	-rm main
+	-rm $(BIN)
