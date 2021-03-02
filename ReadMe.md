@@ -113,9 +113,9 @@ for l n+1:3n+1
 
 [**G. Dimarco and L. Pareschi 2014**] Section 5.1
 $$
-\hat{Q}_{k}=\sum_{l, m=-N \atop l+m=k}^{N} \hat{f}_{l} \hat{f}_{m} \hat{\beta}(l, m), \quad k=-N, \ldots, N
+\hat{Q}_{k}=\sum_{l, m=-N \atop l+m=k}^{N} \hat{f}_{l} \hat{f}_{m} \hat{\beta}(l, m), \quad k=-n, \ldots, n
 $$
-where the Boltzmann kernel modes $\hat{\beta}(l, m)=\hat{B}(l, m)-\hat{B}(m, m)$ are now given by 
+jwhere the Boltzmann kernel modes $\hat{\beta}(l, m)=\hat{B}(l, m)-\hat{B}(m, m)$ are now given by 
 $$
 \hat{B}(l, m)=\int_{\mathcal{B}_{0}(2 \lambda \pi)} \int_{\mathbb{S}^{2}}|q| \sigma(|q|, \cos \theta) e^{-i\left(l \cdot q^{+}+m \cdot q^{-}\right)} d \omega d q
 $$
@@ -129,6 +129,17 @@ $$
 $$
 where $p=(\xi+\eta), q=(\xi-\eta)$.
 
+Special cases
+$$
+\begin{aligned}
+F_0(\xi,0) &= -\frac{\xi \cos (\xi) + sin (\xi)}{\xi^3}\\
+F_0(0,0) &= \frac{1}{3}\\
+F_0(\xi,\xi) &= \frac{\xi-\cos(\xi)\sin(\xi)}{2\xi^3}\\
+F_1(\xi,0)  &= \frac{-2-(-2+\xi^2)\cos(\xi) + 2\xi \sin (\xi)}{\xi^4}\\
+F_1(0,0)  &= \frac{1}{4}\\
+F_1(\xi,\xi) &= \frac{-1-2\xi^2+\cos(2\xi) + 2\xi \sin (2\xi)}{\xi^4}
+\end{aligned}
+$$
 
 
 
