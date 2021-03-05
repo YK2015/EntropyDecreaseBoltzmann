@@ -113,7 +113,7 @@ for l n+1:3n+1
 
 [**G. Dimarco and L. Pareschi 2014**] Section 5.1
 $$
-\hat{Q}_{k}=\sum_{l, m=-N \atop l+m=k}^{N} \hat{f}_{l} \hat{f}_{m} \hat{\beta}(l, m), \quad k=-n, \ldots, n
+\hat{Q}_{k}=\sum_{l=-N }^{N} \hat{f}_{l} \hat{f}_{k-l} \hat{\beta}(l, k-l), \quad k=-n, \ldots, n
 $$
 jwhere the Boltzmann kernel modes $\hat{\beta}(l, m)=\hat{B}(l, m)-\hat{B}(m, m)$ are now given by 
 $$
