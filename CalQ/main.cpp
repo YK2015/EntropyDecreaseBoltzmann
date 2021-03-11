@@ -1,31 +1,50 @@
 #include "calBBox.h"
 #include <stdlib.h>
 #include <random>
+#include <complex>
+
+#include "TimeWatch.h"
+
 
 int main(int argc, char** argv)
 {
+	typedef double  r_type;
+	typedef std::complex<double>  c_type;
 	
 	int N0 = std::atoi(argv[1]);
 
-//	int N = N0;
 	int N = N0*N0*N0;
-	std::vector<double> fin(N), Qout(N), Qout2(N);
-	for (auto & x : fin) x = rand() % 10;
+	std::vector<c_type> fin(N), Qout(N), Qout2(N);
+	for (auto & x : fin) {
+		x = c_type{static_cast<double>(rand() % 10), static_cast<double>(rand()%10)};
+	}
 
-
-	directEvaluation<double> de(N0,0);
+	
+	std::cout << "# Direct evaluation...\n";
+	directEvaluation<c_type,r_type> de(N0,0);
 	de.genB();
-	de.calQ(Qout,fin);
+	{ 
+	  TimeWatch<r_type> twatch;
+	  de.calQ(Qout,fin);
+	}
 
-	QCalculator<double> qc(N,0);
+	
+	std::cout <<"# End direct evaluation.\n\n";
+
+	std::cout << "# Fast evaluation...\n";
+	QCalculator<c_type,r_type> qc(N0,0);
 	qc.genB();
-	qc.calQ(Qout2,fin);
+	{
+	  TimeWatch<r_type> tw;
+	  qc.calQ(Qout2,fin);
+	}
+	std::cout << "# End fast evaluation.\n\n";
 
 
 	std::cout << "i\texact\tqc\t|qc-exact|\n";
-	double l2err = 0., tmperr;
+	r_type l2err = 0., tmperr;
 	for(int i = 0; i < N; ++i){
-		tmperr = fabs(Qout[i]-Qout2[i]);
+		tmperr = std::abs(Qout[i]-Qout2[i]);
 		std::cout << i << "\t" << Qout[i] 
 			<< "\t" << Qout2[i] << "\t" << tmperr 
 			<< "\n";

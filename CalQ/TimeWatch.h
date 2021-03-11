@@ -28,9 +28,9 @@ class TimeWatch
 		ctime=(timeType)(clock()-ctime)/CLOCKS_PER_SEC;
 		timeType wtime = timeType(d.count()/1000000.);
 		std::cout <<std::fixed << std::setprecision(2) 
-							<< "# WTime: " << wtime << "s\t"
+							<< "#\tWTime: " << wtime << "s\t"
 							<< "CTime: " << ctime << "s\n"
-							<< "# Speedup: " << ctime/wtime << "\n";
+							<< "#\tSpeedup: " << ctime/wtime << "\n";
 	};
 	
 };

@@ -6,19 +6,20 @@
 #include <iostream>
 #include <iomanip>
 #include <assert.h>
+#include <complex>
 
 #define DEBUG 1
 
-template <class value_type>
+template <class c_type, class r_type>
 class QCalculator
 {
-	private:
+	public:
 		int N;	///	number of dof in  each direction, only support odd N now
 		int n;	///	number of positive exponents 
 
-		std::vector<value_type> Q;	/// stored in the standard way 
-		std::vector<value_type> f;	/// stored in fftw way
-		std::vector<value_type> B;	/// stored in a specified manner for fast evaluation of Q
+		std::vector<c_type> Q;	/// stored in the standard way, complex
+		std::vector<c_type> f;	/// stored in fftw way, complex
+		std::vector<r_type> B;	/// stored in a specified manner for fast evaluation of Q, real type
 
 
 		int alpha;	/// the type of the kernel B; alpha = 0 associated with Maxwell molecules
@@ -41,49 +42,49 @@ public:
 		};	
 
 	  void genB();	/// generate B
-		value_type funF(value_type, value_type);
-	 	virtual	void calQ(std::vector<value_type> & Qout, 
-				const std::vector<value_type> & fin);
-		void transf(const std::vector<value_type> & fin);
+		r_type funF(r_type, r_type);
+	 	virtual	void calQ(std::vector<c_type> & Qout, 
+				const std::vector<c_type> & fin);
+		void transf(const std::vector<c_type> & fin);
 };
 
-#define TEMPLATE template <class value_type> 
-#define THIS QCalculator<value_type>
+#define TEMPLATE template <class c_type, class r_type> 
+#define THIS QCalculator<c_type, r_type>
 
-template <class value_type>
-value_type QCalculator<value_type>::funF(value_type xi, value_type eta)
+TEMPLATE
+r_type THIS::funF(r_type xi, r_type eta)
 {
-		value_type p = xi + eta, q = xi - eta;
-		value_type res = value_type(0);
+		r_type p = xi + eta, q = xi - eta;
+		r_type res = r_type(0);
 		if(alpha == 0){
 			if(eta < 1.0e-10){
-				if(xi < 1.0e-10) res = value_type(1./3.);
+				if(xi < 1.0e-10) res = r_type(1./3.);
 				else res = -(xi*cos(xi)+sin(xi))/(xi*xi*xi);
 			}
 			else{
 				if(xi < 1.0e-10) res = -(eta*cos(eta)+sin(eta))/(eta*eta*eta);
-				else if (abs(xi-eta) < 1.0e-10) res = (xi-cos(xi)*sin(xi))/(2.*xi*xi*xi);
+				else if (std::abs(xi-eta) < 1.0e-10) res = (xi-cos(xi)*sin(xi))/(2.*xi*xi*xi);
 				else	res = (p*sin(q) - q*sin(p))/(2.*xi*eta*p*q);
 			}
 				
 		}
 		else if (alpha == 1){
 			if(eta < 1.0e-10){
-				if(xi < 1.0e-10) res = value_type(1./4.);
+				if(xi < 1.0e-10) res = r_type(1./4.);
 				else res = (-2.-(-2.+xi*xi)*cos(xi)+2.*xi*sin(xi))/(xi*xi*xi*xi);
 			}
 			else{
 				if(xi < 1.0e-10) res = (-2.-(-2.+eta*eta)*cos(eta)+2.*eta*sin(eta))/(eta*eta*eta*eta);
-				else if (abs(xi-eta) < 1.0e-10) res = -(-1.-2.*xi*xi+cos(2.*xi)+2.*xi*sin(2.*xi))/(xi*xi*xi*xi);
+				else if (std::abs(xi-eta) < 1.0e-10) res = -(-1.-2.*xi*xi+cos(2.*xi)+2.*xi*sin(2.*xi))/(xi*xi*xi*xi);
 				else	res = (q*sin(q)+cos(q)-p*sin(q)-cos(p))/(2.*xi*eta*q*q) - 2./(p*p*q*q);
 			}
 		}
-		else res = value_type(0);
+		else res = r_type(0);
 		return res;
 }
 
 TEMPLATE
-void THIS::transf(const std::vector<value_type> & fin)
+void THIS::transf(const std::vector<c_type> & fin)
 {
 	int k = 0, kin1, kin2, kin3, kin;
 	for(int k1 = 0; k1 < 2*N; ++k1){
@@ -103,22 +104,22 @@ TEMPLATE
 void THIS::genB()
 {
 	for(auto& x : B) x = 0.;
-	value_type xi, eta;
-	value_type lambda = value_type(2./(3.+sqrt(2)) * 4.*atan(1.));
+	r_type xi, eta;
+	r_type lambda = r_type(2./(3.+sqrt(2)) * 4.*atan(1.));
 
 	int m1,m2,m3,m, ib =0;
 	int xi1,xi2,xi3, eta1,eta2,eta3;
 	int ibm = 0;
 
-	std::vector<value_type> Bmm(N*N*N);
+	std::vector<r_type> Bmm(N*N*N);
 	for(int k1 = 0; k1 < N; ++k1){
 		xi1 = k1+k1-2*n;  xi1 *= xi1;
 		for(int k2 = 0; k2 < N; ++k2){
 			xi2 = k2+k2-2*n; xi2 *= xi2;
 			for(int k3 = 0; k3 < N; ++k3){
 				xi3 = k3+k3-2*n; xi3 *= xi3;
-				xi = value_type(sqrt(xi1+xi2+xi3)*lambda);	
-				eta = value_type(0);
+				xi = r_type(sqrt(xi1+xi2+xi3)*lambda);	
+				eta = r_type(0);
 				Bmm[ibm++] = funF(xi,eta);
 			}
 		}
@@ -147,8 +148,8 @@ void THIS::genB()
 							else if (m3 > N-1) m3 -= N;
 							m = (m1*N+m2)*N+m3;
 							xi3 = l3-n+m3-n; xi3 *= xi3; eta3 = l3-m3; eta3 *= eta3;
-							xi = value_type(sqrt(xi1+xi2+xi3)) * lambda;	
-							eta = value_type(sqrt(eta1+eta2+eta3)) * lambda;	
+							xi = r_type(sqrt(xi1+xi2+xi3)) * lambda;	
+							eta = r_type(sqrt(eta1+eta2+eta3)) * lambda;	
 							B[ib++] = funF(xi,eta) - Bmm[m];
 						}
 					}
@@ -157,15 +158,14 @@ void THIS::genB()
 }
 
 TEMPLATE
-void THIS::calQ(std::vector<value_type > & Qout,
-		const std::vector<value_type> & fin)
+void THIS::calQ(std::vector<c_type > & Qout,
+		const std::vector<c_type> & fin)
 {
-	for(auto& x : Qout) x = 0;
+	for(auto& x : Qout) x = c_type(0);
 	transf(fin);
 
 	int Nf = 2*N;
 	int m = 0,k,l,k_l;
-	std::cout << "n = " << n << "\n";
 	for(int l1 = n+1; l1 < N+n+1; ++l1){
 		for(int l2 = n+1; l2 < N+n+1; ++l2){
 			for(int l3 = n+1; l3 < N+n+1; ++l3){
@@ -186,14 +186,14 @@ void THIS::calQ(std::vector<value_type > & Qout,
 #undef TEMPLATE
 #undef THIS
 
-template<class value_type>
+template<class c_type, class r_type>
 class directEvaluation
 {
 	public:
 		int N, n;
-		std::vector<value_type> f; 
-		std::vector<value_type> Q;
-		std::vector<value_type> B;
+		std::vector<c_type> f; 
+		std::vector<c_type> Q;
+		std::vector<r_type> B;
 
 		int alpha;	/// the type of the kernel B; alpha = 0 associated with Maxwell molecules
 								/// alpha = 1 correpsonds to the hard spheres
@@ -212,50 +212,50 @@ public:
 			f.resize(Nf);	
 			Q.resize(NQ);
 			B.resize(NB);
-			std::cout << "N = " << N << "\nsize(f) = " << Nf 
-				<< "\nsize(Q) = " << NQ
-				<< "\nsize(B) = " << NB << "\n";
+			std::cout << "#\tN = " << N << "\n#\tsize(f) = " << Nf 
+				<< "\n#\tsize(Q) = " << NQ
+				<< "\n#\tsize(B) = " << NB << "\n";
 		};	
 
-		value_type funF(value_type, value_type);
+		r_type funF(r_type, r_type);
 
 	  void genB();	/// generate B
-	 	virtual	void calQ(std::vector<value_type> & Qout, 
-				const std::vector<value_type> & fin);
-		void transf(const std::vector<value_type> & fin);
+	 	virtual	void calQ(std::vector<c_type> & Qout, 
+				const std::vector<c_type> & fin);
+		void transf(const std::vector<c_type> & fin);
 };
 
-#define TEMPLATE template <class value_type>
-#define THIS directEvaluation<value_type> 
+#define TEMPLATE template <class c_type, class r_type>
+#define THIS directEvaluation<c_type, r_type> 
 TEMPLATE
-value_type THIS::funF(value_type xi, value_type eta)
+r_type THIS::funF(r_type xi, r_type eta)
 {
-		value_type p = xi + eta, q = xi - eta;
-		value_type res = value_type(0);
+		r_type p = xi + eta, q = xi - eta;
+		r_type res = r_type(0);
 		if(alpha == 0){
 			if(eta < 1.0e-10){
-				if(xi < 1.0e-10) res = value_type(1./3.);
+				if(xi < 1.0e-10) res = r_type(1./3.);
 				else res = -(xi*cos(xi)+sin(xi))/(xi*xi*xi);
 			}
 			else{
 				if(xi < 1.0e-10) res = -(eta*cos(eta)+sin(eta))/(eta*eta*eta);
-				else if (abs(xi-eta) < 1.0e-10) res = (xi-cos(xi)*sin(xi))/(2.*xi*xi*xi);
+				else if (std::abs(xi-eta) < 1.0e-10) res = (xi-cos(xi)*sin(xi))/(2.*xi*xi*xi);
 				else	res = (p*sin(q) - q*sin(p))/(2.*xi*eta*p*q);
 			}
 				
 		}
 		else if (alpha == 1){
 			if(eta < 1.0e-10){
-				if(xi < 1.0e-10) res = value_type(1./4.);
+				if(xi < 1.0e-10) res = r_type(1./4.);
 				else res = (-2.-(-2.+xi*xi)*cos(xi)+2.*xi*sin(xi))/(xi*xi*xi*xi);
 			}
 			else{
 				if(xi < 1.0e-10) res = (-2.-(-2.+eta*eta)*cos(eta)+2.*eta*sin(eta))/(eta*eta*eta*eta);
-				else if (abs(xi-eta) < 1.0e-10) res = -(-1.-2.*xi*xi+cos(2.*xi)+2.*xi*sin(2.*xi))/(xi*xi*xi*xi);
+				else if (std::abs(xi-eta) < 1.0e-10) res = -(-1.-2.*xi*xi+cos(2.*xi)+2.*xi*sin(2.*xi))/(xi*xi*xi*xi);
 				else	res = (q*sin(q)+cos(q)-p*sin(q)-cos(p))/(2.*xi*eta*q*q) - 2./(p*p*q*q);
 			}
 		}
-		else res = value_type(0);
+		else res = r_type(0);
 		return res;
 }
 
@@ -266,19 +266,19 @@ void THIS::genB()
 	for(int i = 0; i < NB; ++i)
 			B[i] = 0.;
 
-	value_type xi, eta;
-	value_type lambda = value_type(2./(3.+sqrt(2)) * 4.*atan(1.));
+	r_type xi, eta;
+	r_type lambda = r_type(2./(3.+sqrt(2)) * 4.*atan(1.));
 	int xi1,xi2,xi3,eta1,eta2,eta3, ib=0;
 
-	std::vector<value_type> Bmm(N*N*N);
+	std::vector<r_type> Bmm(N*N*N);
 	for(int k1 = 0; k1 < N; ++k1){
 		xi1 = k1+k1-2*n;  xi1 *= xi1;
 		for(int k2 = 0; k2 < N; ++k2){
 			xi2 = k2+k2-2*n; xi2 *= xi2;
 			for(int k3 = 0; k3 < N; ++k3){
 				xi3 = k3+k3-2*n; xi3 *= xi3;
-				xi = value_type(sqrt(xi1+xi2+xi3)*lambda);	
-				eta = value_type(0);
+				xi = r_type(sqrt(xi1+xi2+xi3)*lambda);	
+				eta = r_type(0);
 				Bmm[ib++] = funF(xi,eta);
 			}
 		}
@@ -295,8 +295,8 @@ void THIS::genB()
 						xi2 = l2-n+m2-n; xi2 *= xi2; eta2 = l2-m2; eta2 *= eta2;
 						for(int m3 = 0; m3 < N; ++m3){
 							xi3 = l3-n+m3-n; xi3 *= xi3; eta3 = l3-m3; eta3 *= eta3;
-							xi = value_type(sqrt(xi1+xi2+xi3)) * lambda;	
-							eta = value_type(sqrt(eta1+eta2+eta3)) * lambda;	
+							xi = r_type(sqrt(xi1+xi2+xi3)) * lambda;	
+							eta = r_type(sqrt(eta1+eta2+eta3)) * lambda;	
 							B[ib++] = funF(xi,eta) - Bmm[ibm++];
 						}
 					}
@@ -307,8 +307,8 @@ void THIS::genB()
 }
 
 TEMPLATE
-void THIS::calQ(std::vector<value_type> & Qout, 
-				const std::vector<value_type> & fin)
+void THIS::calQ(std::vector<c_type> & Qout, 
+				const std::vector<c_type> & fin)
 {
 	for(auto & x : Qout) x = 0.;
 
@@ -347,15 +347,15 @@ void THIS::calQ(std::vector<value_type> & Qout,
 }
 
 TEMPLATE
-void THIS::transf(const std::vector<value_type> & fin)
+void THIS::transf(const std::vector<c_type> & fin)
 {
 	int k = 0, kin1, kin2, kin3, kin;
 	for(int k1 = 0; k1 < N; ++k1){
 		kin1 = (k1 < n) ? k1+n+1 : k1-n;
 		for(int k2 = 0; k2 < N; ++k2){
-			kin2 = (k2 < N) ? k2+n+1 : k2-n;
+			kin2 = (k2 < n) ? k2+n+1 : k2-n;
 			for(int k3 = 0; k3 < N; ++k3){
-				kin3 = (k3 < N) ? k3+n+1 : k3-n;
+				kin3 = (k3 < n) ? k3+n+1 : k3-n;
 				kin = (kin1*N+kin2)*N + kin3;
 				f[k++] = fin[kin];	
 			}

@@ -6,7 +6,7 @@ CXXFLAGS = -Wall
 LDFLAGS = -lm
 
 ifeq (x$(debug), x)
-	CXXFLAGS += -O3
+	CXXFLAGS += -O3 -std=c++14
 else
 	CXXFLAGS += -g -DDEBUG
 endif
