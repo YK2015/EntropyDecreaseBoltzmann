@@ -41,11 +41,12 @@ public:
 			B.resize(NB*NB);
 		};	
 
-	  void genB();	/// generate B
+		void genB();	/// generate B
 		r_type funF(r_type, r_type);
 	 	virtual	void calQ(std::vector<c_type> & Qout, 
 				const std::vector<c_type> & fin);
-		void transf(const std::vector<c_type> & fin);
+		void transf(const std::vector<c_type> & fin); /// input f
+		void convertQ(std::vector<c_type> & Qout); ///  output Q
 };
 
 #define TEMPLATE template <class c_type, class r_type> 
@@ -98,6 +99,24 @@ void THIS::transf(const std::vector<c_type> & fin)
 			}
 		}
 	}
+}
+
+TEMPLATE
+void THIS::convertQ(std::vector<c_type> & Qout)
+{
+  int k = 0, kout1, kout2, kout3, kout;
+	for(int k1 = 0; k1 < N; ++k1){
+		kout1 = (k1 < n) ? k1+n+1 : k1-n;
+		for(int k2 = 0; k2 < N; ++k2){
+			kout2 = (k2 < n) ? k2+n+1 : k2-n;
+			for(int k3 = 0; k3 < N; ++k3){
+				kout3 = (k3 < n) ? k3+n+1 : k3-n;
+				kout = (kout1*N+kout2)*N + kout3;
+				Qout[kout] = Q[k++];					
+			}
+		}
+	}
+
 }
 
 TEMPLATE
@@ -161,7 +180,7 @@ TEMPLATE
 void THIS::calQ(std::vector<c_type > & Qout,
 		const std::vector<c_type> & fin)
 {
-	for(auto& x : Qout) x = c_type(0);
+	for(auto& x : Q) x = c_type(0);
 	transf(fin);
 
 	int Nf = 2*N;
@@ -174,13 +193,15 @@ void THIS::calQ(std::vector<c_type > & Qout,
 					for(int k2 = 3*n+2-l2; k2 < 5*n+3-l2; ++k2){
 						for(int k3 = 3*n+2-l3; k3 < 5*n+3-l3; ++k3){
 							k_l = (k1*Nf+k2)*Nf + k3;
-							Qout[k++] += f[l] * f[k_l] * B[m++];
+							Q[k++] += f[l] * f[k_l] * B[m++];
 						}
 					}
 				}
 			}
 		}
 	}
+
+	convertQ(Qout);
 
 }
 #undef TEMPLATE
@@ -223,6 +244,7 @@ public:
 	 	virtual	void calQ(std::vector<c_type> & Qout, 
 				const std::vector<c_type> & fin);
 		void transf(const std::vector<c_type> & fin);
+		void convertQ(std::vector<c_type> & Qout); ///  output Q
 };
 
 #define TEMPLATE template <class c_type, class r_type>
@@ -310,7 +332,7 @@ TEMPLATE
 void THIS::calQ(std::vector<c_type> & Qout, 
 				const std::vector<c_type> & fin)
 {
-	for(auto & x : Qout) x = 0.;
+	for(auto & x : Q) x = 0.;
 
 	int Nb = N*N*N;
 
@@ -336,13 +358,15 @@ void THIS::calQ(std::vector<c_type> & Qout,
 							else if (l3 > k3+n) m3 = k3-l3+3*n+1;
 							else m3 = k3-l3+n;
 							m = (m1*N+m2)*N+m3;
-							Qout[k++] += f[l]*f[m]*B[l*Nb+m];
+							Q[k++] += f[l]*f[m]*B[l*Nb+m];
 						}
 					}
 				}
 			}
 		}
 	}
+
+	convertQ(Qout);
 
 }
 
@@ -362,7 +386,23 @@ void THIS::transf(const std::vector<c_type> & fin)
 		}
 	}
 }
+TEMPLATE
+void THIS::convertQ(std::vector<c_type> & Qout)
+{
+  int k = 0, kout1, kout2, kout3, kout;
+	for(int k1 = 0; k1 < N; ++k1){
+		kout1 = (k1 < n) ? k1+n+1 : k1-n;
+		for(int k2 = 0; k2 < N; ++k2){
+			kout2 = (k2 < n) ? k2+n+1 : k2-n;
+			for(int k3 = 0; k3 < N; ++k3){
+				kout3 = (k3 < n) ? k3+n+1 : k3-n;
+				kout = (kout1*N+kout2)*N + kout3;
+				Qout[kout] = Q[k++];					
+			}
+		}
+	}
 
+}
 #undef TEMPLATE
 #undef THIS
 
