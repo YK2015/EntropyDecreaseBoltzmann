@@ -22,7 +22,11 @@ int main(int argc, char** argv)
 	
 	std::cout << "# Direct evaluation...\n";
 	directEvaluation<c_type,r_type> de(N0,0);
-	de.genB();
+	{
+	  std::cout << "# DE::genB\t";
+	  TimeWatch<r_type> tw;
+	  de.genB();
+	}
 	{ 
 	  TimeWatch<r_type> twatch;
 	  de.calQ(Qout,fin);
@@ -33,7 +37,11 @@ int main(int argc, char** argv)
 
 	std::cout << "# Fast evaluation...\n";
 	QCalculator<c_type,r_type> qc(N0,0);
-	qc.genB();
+	{
+	  std::cout << "# FE::genB\t";
+	  TimeWatch<r_type> tw;
+	  qc.genB();
+	}
 	{
 	  TimeWatch<r_type> tw;
 	  qc.calQ(Qout2,fin);
@@ -41,13 +49,13 @@ int main(int argc, char** argv)
 	std::cout << "# End fast evaluation.\n\n";
 
 
-	std::cout << "i\texact\tqc\t|qc-exact|\n";
+//	std::cout << "i\texact\tqc\t|qc-exact|\n";
 	r_type l2err = 0., tmperr;
 	for(int i = 0; i < N; ++i){
 		tmperr = std::abs(Qout[i]-Qout2[i]);
-		std::cout << i << "\t" << Qout[i] 
-			<< "\t" << Qout2[i] << "\t" << tmperr 
-			<< "\n";
+//		std::cout << i << "\t" << Qout[i] 
+//			<< "\t" << Qout2[i] << "\t" << tmperr 
+//			<< "\n";
 		l2err += tmperr*tmperr;
 	}
 	std::cout << "L2err = " << l2err << "\n";
