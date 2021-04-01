@@ -1,4 +1,5 @@
 #include "QCalculator.h"
+#include "TimeWatch.h"
 #include <stdlib.h>
 #include <random>
 #include <complex>
@@ -23,12 +24,12 @@ int main(int argc, char** argv)
 	QCalculator<c_type,r_type> qc(N0,0);
 	{
 	  std::cout << "# FE::genB\n";
-	//  TimeWatch<r_type> tw;
+	  TimeWatch<r_type> tw;
 	  qc.genB();
 	}
 	{
 	  std::cout << "# FE::calQ\n";
-	 // TimeWatch<r_type> tw;
+	  TimeWatch<r_type> tw;
 	  qc.calQ(Qout2,fin);
 	}
 	std::cout << "# End fast evaluation.\n\n";
