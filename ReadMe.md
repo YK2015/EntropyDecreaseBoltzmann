@@ -149,4 +149,16 @@ $$
 
 
 
+## 3. Runge--Kutta method
+
+1. initial guess
+
+2. fftw3 interface
+
+3. rk-4
+
+4. nofiltering: for smooth case, it enjoys higher accuracy
+
+   
+
 
