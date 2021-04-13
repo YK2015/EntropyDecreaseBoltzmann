@@ -138,12 +138,12 @@ where $p=(\xi+\eta), q=(\xi-\eta)$.
 Special cases
 $$
 \begin{aligned}
-F_0(\xi,0) &= -\frac{\xi \cos (\xi) + sin (\xi)}{\xi^3}\\
+F_0(\xi,0) &= \frac{-\xi \cos (\xi) + \sin (\xi)}{\xi^3}\\
 F_0(0,0) &= \frac{1}{3}\\
 F_0(\xi,\xi) &= \frac{\xi-\cos(\xi)\sin(\xi)}{2\xi^3}\\
 F_1(\xi,0)  &= \frac{-2-(-2+\xi^2)\cos(\xi) + 2\xi \sin (\xi)}{\xi^4}\\
 F_1(0,0)  &= \frac{1}{4}\\
-F_1(\xi,\xi) &= \frac{-1-2\xi^2+\cos(2\xi) + 2\xi \sin (2\xi)}{\xi^4}
+F_1(\xi,\xi) &= -\frac{-1-2\xi^2+\cos(2\xi) + 2\xi \sin (2\xi)}{8\xi^4}
 \end{aligned}
 $$
 
@@ -159,6 +159,6 @@ $$
 
 4. nofiltering: for smooth case, it enjoys higher accuracy
 
-   
+5. change to array for faster evaluation
 
 
