@@ -87,7 +87,7 @@ r_type THIS::funF(r_type xi, r_type eta)
 			else{
 				if(xi < 1.0e-10) res = (-2.-(-2.+eta*eta)*cos(eta)+2.*eta*sin(eta))/(eta*eta*eta*eta);
 				else if (std::abs(xi-eta) < 1.0e-10) res = -(-1.-2.*xi*xi+cos(2.*xi)+2.*xi*sin(2.*xi))/(8.*xi*xi*xi*xi);
-				else	res = (q*sin(q)+cos(q))/(2.*xi*eta*q*q)-(p*sin(q)+cos(p))/(2.*xi*eta*p*p) - 2./(p*p*q*q);
+				else	res = (q*sin(q)+cos(q))/(2.*xi*eta*q*q)-(p*sin(p)+cos(p))/(2.*xi*eta*p*p) - 2./(p*p*q*q);
 			}
 		}
 		else res = r_type(0);
