@@ -21,14 +21,15 @@ class fft3d
 		~fftw3d(){};
 
 	public:
-		void fft(int Nx, int Ny, int Nz, const fftw_complex& re , fftw_complex& fre){
+		/// fftw_complex = std::complex<double> 
+		void fft(int Nx, int Ny, int Nz, fftw_complex* re , fftw_complex* fre){
 			fftw_plan p;
 			p = fftw_plan_dft_3d(Nx,Ny,Nz, re, fre, FFTW_FORWARD, FFTW_ESTIMATE);
 			fftw_execute(p);
 			fftw_destroy_plan(p);
 		}
 
-		void ifft(int Nx, int Ny, int Nz, fftw_complex& re , const fftw_complex& fre){
+		void ifft(int Nx, int Ny, int Nz, fftw_complex* re , fftw_complex* fre){
 			fftw_plan p;
 			p = fftw_plan_dft_3d(Nx,Ny,Nz, fre, re, FFTW_FORWARD, FFTW_ESTIMATE);
 			fftw_execute(p);
