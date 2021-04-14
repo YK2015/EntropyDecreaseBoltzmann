@@ -17,8 +17,8 @@
 class fft3d
 {
 	public:
-		fftw3d(){};
-		~fftw3d(){};
+		fft3d(){};
+		~fft3d(){};
 
 	public:
 		/// fftw_complex = std::complex<double> 
@@ -44,8 +44,7 @@ class fft3d
 						re[k] *= 1./N;++k;
 					}
 		}
-}
-;
+};
 
 
 
