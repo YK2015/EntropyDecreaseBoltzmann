@@ -21,7 +21,7 @@ class fft3d
 		~fft3d(){};
 
 	public:
-		/// fftw_complex = std::complex<double> 
+		/// fftw_complex = double [2]
 		void fft(int Nx, int Ny, int Nz, fftw_complex* re , fftw_complex* fre){
 			fftw_plan p;
 			p = fftw_plan_dft_3d(Nx,Ny,Nz, re, fre, FFTW_FORWARD, FFTW_ESTIMATE);
@@ -31,7 +31,7 @@ class fft3d
 
 		void ifft(int Nx, int Ny, int Nz, fftw_complex* re , fftw_complex* fre){
 			fftw_plan p;
-			p = fftw_plan_dft_3d(Nx,Ny,Nz, fre, re, FFTW_FORWARD, FFTW_ESTIMATE);
+			p = fftw_plan_dft_3d(Nx,Ny,Nz, fre, re, FFTW_BACKWARD, FFTW_ESTIMATE);
 			fftw_execute(p);
 			fftw_destroy_plan(p);
 
@@ -41,7 +41,9 @@ class fft3d
 			for(int i= 0; i < Nx; ++ i)
 				for(int j = 0; j < Ny; ++j)
 					for(int l = 0; l < Ny; ++l){
-						re[k] *= 1./N;++k;
+						re[k][0] *= 1./N;
+						re[k][1] *= 1./N;
+						++k;
 					}
 		}
 };

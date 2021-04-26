@@ -152,13 +152,22 @@ $$
 ## 3. Runge--Kutta method
 
 1. initial guess
-
 2. fftw3 interface
-
-3. rk-4
-
+3. 1rk-4
 4. nofiltering: for smooth case, it enjoys higher accuracy
-
 5. change to array for faster evaluation
 
+## 4. Experiments
+
+$T_\mathrm{end} = 0.1$ 
+
+| spatial $N$ | $dt$   | at which $t$ entropy incrase | details                                 |
+| ----------- | ------ | ---------------------------- | --------------------------------------- |
+| 19          | 0.0015 | 0.003                        | 32`19`$\to$32`25`                       |
+| 21          | 0.0015 | 0.003                        | 32`17`$\to$32`22`                       |
+|             | 0.001  | -                            | always decrease                         |
+| 23          | 0.0015 | 0.003                        | 32`26`$\to$32`32`                       |
+|             | 0.001  | 0.07                         | 3224.721280622`4`$\to$3224.721280622`5` |
+| 27          | 0.0015 | 0.003                        | 322`2`$\to$322`7`                       |
+|             | 0.001  | 0.065                        | 3220.112340550`7`$\to$3220.112340550`8` |
 

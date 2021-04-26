@@ -14,7 +14,8 @@ int main(int argc, char** argv)
 	int N0 = std::atoi(argv[1]);
 
 	int N = N0*N0*N0;
-	std::vector<c_type> fin(N), Qout(N), Qout2(N);
+	//std::vector<c_type> fin(N), Qout(N), Qout2(N);
+	c_type fin[N], Qout[N], Qout2[N];
 	for (auto & x : fin) {
 		x = c_type{static_cast<double>(rand() % 10), static_cast<double>(rand()%10)};
 	}
