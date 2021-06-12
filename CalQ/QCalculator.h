@@ -177,7 +177,7 @@ void THIS::genB()
 
 	r_type fil_val = r_type(1.);
 	std::vector<r_type> Bmm(N*N*N);
-	std::ofstream writeB("diagB.dat");
+//	std::ofstream writeB("diagB.dat");
 	for(int k1 = -n; k1 < n+1; ++k1)
 		for(int k2 = -n; k2 < n+1; ++k2)
 			for(int k3 = -n; k3 < n+1; ++k3){
@@ -186,12 +186,12 @@ void THIS::genB()
 				eta = r_type(0);
 				if(IS_FILTER) fil_val = calFil(k1,k2,k3);
 				Bmm[ibm++] = funF(xi,eta)*fil_val*fil_val*rval;
-				writeB << k1 << "\t" << k2 << "\t" << k3 << "\t" << Bmm[ibm-1]<< "\n";
+//				writeB << k1 << "\t" << k2 << "\t" << k3 << "\t" << Bmm[ibm-1]<< "\n";
 
 
 			}
 		
-	writeB.close();
+//	writeB.close();
 	
 
   r_type sigmal = r_type(1);

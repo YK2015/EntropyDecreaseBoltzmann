@@ -7,7 +7,8 @@
 #include <iomanip>
 #include <assert.h>
 //#include <complex>
-#include "mkl.h"
+//#include "mkl.h"
+
 
 template <class i_type, class r_type>
 class EntropyFix
@@ -41,7 +42,6 @@ class EntropyFix
 		void FixSol(std::vector<r_type> & fin, r_type AimEntropy);	/// Bisection method to find the entropic solution
 		void FixSol(i_type Nf, r_type* fin, r_type AimEntropy);	/// Bisection method to find the entropic solution
 
-
 		void FixSol(const std::vector<r_type> &fin, std::vector<r_type> &fout, r_type AimEntropy);	/// If we need the input function unchanged. Future work.
 };
 
@@ -55,8 +55,11 @@ void THIS::setAverage(const std::vector<r_type> & fin)
 	assert(Nf == Nt);
 
 	Average_flag = true;
-	Averagef = cblas_dasum(Nf, &(fin[0]), 1);
+	//Averagef = cblas_dasum(Nf, &(fin[0]), 1);
+	Averagef = 0.;
+	for(int i = 0; i < Nf; ++i) Averagef += fin[i];
 	Averagef /= (r_type)Nf;
+	std::cout << "\nAverafe f\t" << Averagef << "\n";
 }
 
 	TEMPLATE
@@ -65,8 +68,13 @@ void THIS::setAverage(i_type Nf, r_type* fin)
 	assert(Nf == Nt);
 
 	Average_flag = true;
-	Averagef = cblas_dasum(Nf, &(fin[0]), 1);
+//	Averagef = cblas_dasum(Nf, &(fin[0]), 1);
+	Averagef = 0.;
+	for(int i = 0; i < Nf; ++i) Averagef += fin[i];
+
 	Averagef /= (r_type)Nf;
+	std::cout << "\nAverafe f\t" << Averagef << "\n";
+//	std::cout << "\n\t\t#Before FIxing:: " << Averagef << "\n";
 }
 
 	TEMPLATE
@@ -83,15 +91,14 @@ r_type THIS::EntropyCal(const std::vector<r_type> & fin)
 
 	/// I will write two versions. The following one is standard one, meaning no MKL.
 	/// The standard one is faster, compared to the MKL_sequential.
-	/*
-	//#ifndef _MKL_H
+#ifndef _MKL_H
 	for (i_type i=0; i<Nf; i++) {
-	if (fin[i] > eps) {
-	res += fin[i] * log(fin[i]);
+		if (fin[i] > eps) {
+			res += fin[i] * log(fin[i]);
+		}
 	}
-	}
-	//#elif
-	*/
+#elif
+	
 	/// Second version with MKL, r_type should be double. Otherwise use v?Ln
 
 	//for (i_type i=0; i<Nf; i++) {
@@ -108,7 +115,7 @@ r_type THIS::EntropyCal(const std::vector<r_type> & fin)
 	vdLn( Nnonzero, (const r_type*)LogInput, &(LogOutput[0]) );
 	res = cblas_ddot(Nnonzero, &(LogInput[0]), 1, &(LogOutput[0]), 1);
 
-	//#endif
+#endif
 
 	res = res / (r_type)Nf - Averagef;
 	return res;
@@ -127,15 +134,15 @@ r_type THIS::EntropyCal(i_type Nf, r_type *fin)
 
 	/// I will write two versions. The following one is standard one, meaning no MKL.
 	/// The standard one is faster, compared to the MKL_sequential.
-	/*
-	//#ifndef _MKL_H
+	
+#ifndef _MKL_H
 	for (i_type i=0; i<Nf; i++) {
-	if (fin[i] > eps) {
-	res += fin[i] * log(fin[i]);
+		if (fin[i] > eps) {
+			res += fin[i] * log(fin[i]);
+		}
 	}
-	}
-	//#elif
-	*/
+#elif
+
 	/// Second version with MKL, r_type should be double. Otherwise use v?Ln
 
 	//for (i_type i=0; i<Nf; i++) {
@@ -147,8 +154,7 @@ r_type THIS::EntropyCal(i_type Nf, r_type *fin)
 
 	vdLn( Nnonzero, (const r_type*)LogInput, &(LogOutput[0]) );
 	res = cblas_ddot(Nnonzero, &(LogInput[0]), 1, &(LogOutput[0]), 1);
-
-	//#endif
+#endif
 
 	res = res / (r_type)Nf - Averagef;
 	return res;
@@ -174,10 +180,13 @@ void THIS::FixSol(std::vector<r_type> & fin, r_type AimEntropy)
 			x = betaFbar;
 		}
 
-		cblas_daxpy(Nf, 1.0 - betaMid, &(fin[0]), 1, &(fMid[0]), 1);
+//		cblas_daxpy(Nf, 1.0 - betaMid, &(fin[0]), 1, &(fMid[0]), 1);
+		for(int i = 0; i< Nf; ++i) fMid[i] += (1.-betaMid)*fin[i];
+
 		entMid = EntropyCal(fMid);
 		if ( (entMid < AimEntropy) && ((AimEntropy - entMid)<eps) ) {
-			cblas_dcopy(Nf, &(fMid[0]), 1, &(fin[0]), 1);
+			//cblas_dcopy(Nf, &(fMid[0]), 1, &(fin[0]), 1);
+			for(int i =0;i < Nf;++i) fin[i] = fMid[i];
 			return;
 		}
 
@@ -191,7 +200,8 @@ void THIS::FixSol(std::vector<r_type> & fin, r_type AimEntropy)
 	}
 
 	betaFbar = betaR * Averagef;
-	cblas_dscal(Nf, 1.0 - betaR, &(fin[0]), 1);
+	//cblas_dscal(Nf, 1.0 - betaR, &(fin[0]), 1);
+	for(auto &x :fin) x *= (1.0-betaR);
 	for (auto &x : fin) {
 		x += betaFbar;
 	}
@@ -212,14 +222,17 @@ void THIS::FixSol(i_type Nf, r_type * fin, r_type AimEntropy)
 	while ((betaR - betaL) > BiEps) {
 		betaMid = 0.5 * (betaL + betaR);
 
+		if(!Average_flag) setAverage(Nf, 	fin);
 		betaFbar = betaMid * Averagef;
 		for(i_type i=0; i<Nt; i++)
 			fMid[i] = betaFbar;
 
-		cblas_daxpy(Nf, 1.0 - betaMid, fin, 1, fMid, 1);
+		//cblas_daxpy(Nf, 1.0 - betaMid, fin, 1, fMid, 1);
+		for(int i = 0; i< Nf; ++i) fMid[i] += (1.-betaMid)*fin[i];
 		entMid = EntropyCal(Nt,fMid);
 		if ( (entMid < AimEntropy) && ((AimEntropy - entMid)<eps) ) {
-			cblas_dcopy(Nf, fMid, 1, fin, 1);
+			//cblas_dcopy(Nf, fMid, 1, fin, 1);
+			for(int i =0;i < Nf;++i) fin[i] = fMid[i];
 			return;
 		}
 
@@ -233,7 +246,8 @@ void THIS::FixSol(i_type Nf, r_type * fin, r_type AimEntropy)
 	}
 
 	betaFbar = betaR * Averagef;
-	cblas_dscal(Nf, 1.0 - betaR,fin, 1);
+//	cblas_dscal(Nf, 1.0 - betaR,fin, 1);
+	for(i_type i=0; i < Nf; ++i) fin[i] *= (1.0-betaR);
 	for(i_type i=0; i<Nf; i++)
 		fin[i] += betaFbar;
 }

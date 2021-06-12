@@ -1,12 +1,14 @@
 HEADER = $(wildcard *.h)
 BIN = $(patsubst %.cpp, %, $(wildcard *.cpp))
 
-CXXFLAGS = -Wall
+CXX = g++-8
 
-LDFLAGS = -lm
+CXXFLAGS = -w
+
+LDFLAGS = -lm -lfftw3 -llapack
 
 ifeq (x$(debug), x)
-	CXXFLAGS += -O3 -std=c++14
+	CXXFLAGS += -O3 -std=c++14 
 else
 	CXXFLAGS += -g -DDEBUG
 endif

@@ -34,7 +34,8 @@ int main(int argc, char** argv)
 			y = -6. + j*h;
 			for(int k = 0; k < N0; ++k){
 				z = -6. + k*h;
-				F[l] = fun(0,x,y,z);
+				F[l][0] = fun(0,x,y,z);
+				F[l][1] = 0;
 				l++;
 			}
 		}
