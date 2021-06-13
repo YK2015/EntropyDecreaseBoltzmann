@@ -2,79 +2,22 @@
 
 ## 1. Calculating Q
 
+### 1.1 1d illustration
+
+![1dIllustration](1dIllustration.jpg)
+
+Goal:
 $$
-Q_k = \sum_l B(k,l) f_l f_{k-l}
+Q_{k}=\sum_{l=-n}^{n} \hat{f}_{l} \hat{f}_{k-l} \hat{\beta}(l, k-l),\quad k = -n,\dots,n
 $$
 
+| Method                          | description                                                  |
+| ------------------------------- | ------------------------------------------------------------ |
+| Classical way                   | $f$ 标准顺序存储，$\hat{\beta}$ 按$(l,k)$二维数组存储        |
+| duplicate $f$                   | $f$ 按2倍的fftw3顺序存储，$\hat{\beta}$ 按$(l,k)$二维数组存储 |
+| duplicate $f$ and rearrange $B$ | $f$ 按2倍的fftw3顺序存储，$\hat{\beta}$ 按$(l,k-l)$二维数组存储 |
 
-
-1d example
-
-二维数组计算效率更高，或者，按i,j遍历A(i,j)会更快
-
-`int`也比`u_int`快
-
-``k->l f[k-l]`代表逆序遍历`f`, `f[]`代表顺序遍历
-
-`vector<>, a[]` `vector<vector<double> >, a[][]` 
-
-```cpp
-for k
-  for l
-    Q[k] += B[k*N+l]*f[l]*f[k-l]
-    
-for l  0:N
-  for k 0:N
-    Q[k] += B[l*N+k]*f[l]*f[k-l+n+N]
-    
- k-l < 0 +N, >= N -N
-```
-
-```sh
-g++ -o main -O3 
-```
-
-```
-k = -n,...,0,...,n, 0,...n,...2n, 0,...,6n+2. N = 2n+1, 3N,   ki = k+n
-l = -n,...,0,...,n, li = l+n, 
-m = k-l= (ki-n)-(li-n),    m1 =m+n =  ki-li+n
-```
-
-```cpp
-i -n,...,-1,   0,   1,...,   n
-	0, ...,n-1,  n, n+1,...,  2n
-o 0, ...,n-1,  n, -n ,...,  -1 
-```
-
-
-
-| n=20001/CPUTime(s),O3(O0)                | `k->l（f[k-l]）` | `l->k（f[k-l]）` |
-| ---------------------------------------- | ---------------- | ---------------- |
-| 二维数组存储                             | 0.5 (4.46)       | 9.72(30.42)      |
-| 一维数组按列存储                         | 0.50(3.89)       | 5.26(11.42)      |
-| 一维数组按对应行或列存储                 | 0.50(3.89)       | 0.39(3.89)       |
-| 一维数组按列存储+删去`k-l`的判断         | 0.49(3.58)       | 5.18(11.20)      |
-| 一维数组按对应行或列存储+删去`k-l`的判断 | 0.49(3.58)       | 0.30(3.59)       |
-| 一维数组按对应行或列存储+3倍f            |                  | 0.30(3.53)       |
-
-结论：的确，遍历`k,l`的顺序，严重决定运行的时间，差别在优化后甚至有数十倍
-
-2d example
-
-````
-B[i1,i2,j1,j2] B[i,j]
-i1 = i/N; i2 = i %N; i2=i - i1*N;
-````
-
-
-
-| 1d数组+行或列存储 | `i->j（f[n-j]）` | `j->i（f[i]）`+4层loop | `j->i（f[i]）`+2层 | $3^2$倍f |
-| ----------------- | ---------------- | ---------------------- | ------------------ | -------- |
-| n=121*121         | 0.29             | 0.26                   | 1                  | 0.18     |
-| n=151*151         | 0.69(6.12)       | 0.63(6.14)             | 2.38(7.4)          | 0.41     |
-| n=161*161         | 0.9              | 0.81                   | 3.06               | 0.54     |
-| n=181*181         | 1.43             | 1.28                   | 4.91               | 0.85     |
-|                   | 100%             | 90%                    | 340%               | 60%      |
+<img src="1dtest.png" alt="1dtest" style="zoom:30%;" />
 
 
 
@@ -92,36 +35,13 @@ i1 = i/N; i2 = i %N; i2=i - i1*N;
 
 
 
-### 1.1 配合fftw的顺序
-
-$$
-Q_k = \sum_l B(k,l) f_l f_{k-l}
-$$
-
-1d数组+2倍长度
-
-```sh
-指数i 0,1,...,n,  -n,...,-1,   0,   1,...,   n,   -n,...,-1
-指标k 0,1,...,n, n+1,...,2n,2n+1,2n+2,...,3n+1, 3n+2,...,4n+1
-关系 k = i + N; N =2n+1
-指数m = （i - i'） % N = （k - k'）%N
-指标m = m + N =  k - k' + N
-```
-
-```cpp
-for l n+1:3n+1
-  for k n+1:3n+1
-    Q[k] += B[(l-n-1)*N+(k-n-1)] * f[l] * f[k-l+N]
-```
-最后需要补充完整Q
-
 ## 2. Evaluation of B
 
 [**G. Dimarco and L. Pareschi 2014**] Section 5.1
 $$
 \hat{Q}_{k}=\sum_{l=-N }^{N} \hat{f}_{l} \hat{f}_{k-l} \hat{\beta}(l, k-l), \quad k=-n, \ldots, n
 $$
-jwhere the Boltzmann kernel modes $\hat{\beta}(l, m)=\hat{B}(l, m)-\hat{B}(m, m)$ are now given by 
+where the Boltzmann kernel modes $\hat{\beta}(l, m)=\hat{B}(l, m)-\hat{B}(m, m)$ are now given by 
 $$
 \hat{B}(l, m)=\int_{\mathcal{B}_{0}(2 \lambda \pi)} \int_{\mathbb{S}^{2}}|q| \sigma(|q|, \cos \theta) e^{-i\left(l \cdot q^{+}+m \cdot q^{-}\right)} d \omega d q
 $$
@@ -159,15 +79,25 @@ $$
 
 ## 4. Experiments
 
-$T_\mathrm{end} = 0.1$ 
+Remarks
 
-| spatial $N$ | $dt$   | at which $t$ entropy incrase | details                                 |
-| ----------- | ------ | ---------------------------- | --------------------------------------- |
-| 19          | 0.0015 | 0.003                        | 32`19`$\to$32`25`                       |
-| 21          | 0.0015 | 0.003                        | 32`17`$\to$32`22`                       |
-|             | 0.001  | -                            | always decrease                         |
-| 23          | 0.0015 | 0.003                        | 32`26`$\to$32`32`                       |
-|             | 0.001  | 0.07                         | 3224.721280622`4`$\to$3224.721280622`5` |
-| 27          | 0.0015 | 0.003                        | 322`2`$\to$322`7`                       |
-|             | 0.001  | 0.065                        | 3220.112340550`7`$\to$3220.112340550`8` |
+1. $J_{max} = N/2 + c, c < N/2$
+
+```
+ ./testBKW3D 17 0.000855 0.5 490
+```
+
++ entropy tu
++ 比较误差 dt 取非常小， 
++ 不加entropy fix
+
+Setup
+
+| Forward Euler                                                | Detail |
+| ------------------------------------------------------------ | ------ |
+| $T_\mathrm{END}$                                             | 0.08   |
+| $\Delta t_{fe}=\frac{1-\exp (-\beta  \Delta t_\mathrm{cfe})}{\beta }$ | 0.0007 |
+|                                                              |        |
+
+
 
