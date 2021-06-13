@@ -17,9 +17,9 @@ $$
 | duplicate $f$                   | $f$ 按2倍的fftw3顺序存储，$\hat{\beta}$ 按$(l,k)$二维数组存储 |
 | duplicate $f$ and rearrange $B$ | $f$ 按2倍的fftw3顺序存储，$\hat{\beta}$ 按$(l,k-l)$二维数组存储 |
 
-<img src="1dtest.png" alt="1dtest" style="zoom:30%;" />
+<img src="1dTest.png" alt="1dtest" style="zoom:30%;" />
 
-
+​	
 
 3d example
 
