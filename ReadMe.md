@@ -1,4 +1,5 @@
 # Boltzmann entropy code
+[Test]
 
 ## 1. Calculating Q
 
